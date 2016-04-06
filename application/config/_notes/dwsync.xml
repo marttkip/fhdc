@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="config.php" server="192.168.170.16" local="130525665087769913" remote="130525569000000000" Dst="0" />
+<file name="autoload.php" server="192.168.170.16" local="130525665400767816" remote="130525569600000000" Dst="0" />
+<file name="routes.php" server="192.168.170.16" local="130444572000000000" remote="130444572000000000" Dst="0" />
+<file name="database.php" server="192.168.170.16/sumc/" local="130546378465962048" remote="130546267800000000" Dst="0" />
+<file name="routes.php" server="192.168.170.16/sumc/" local="130564613403474473" remote="130564638000000000" Dst="0" />
+<file name="autoload.php" server="192.168.170.16/sumc/development/" local="130525665400767816" remote="130547113800000000" Dst="0" />
+<file name="config.php" server="192.168.170.16/sumc/development/" local="130547226684834215" remote="130547116200000000" Dst="0" />
+<file name="constants.php" server="192.168.170.16/sumc/development/" local="130473911594474972" remote="130547113800000000" Dst="0" />
+<file name="database.php" server="192.168.170.16/sumc/development/" local="130547226492453212" remote="130547116200000000" Dst="0" />
+<file name="doctypes.php" server="192.168.170.16/sumc/development/" local="130473911594006971" remote="130547113800000000" Dst="0" />
+<file name="foreign_chars.php" server="192.168.170.16/sumc/development/" local="130473911593850971" remote="130547113800000000" Dst="0" />
+<file name="grocery_crud.php" server="192.168.170.16/sumc/development/" local="130473911593538971" remote="130547113800000000" Dst="0" />
+<file name="hooks.php" server="192.168.170.16/sumc/development/" local="130473911593382970" remote="130547113800000000" Dst="0" />
+<file name="index.html" server="192.168.170.16/sumc/development/" local="130473911593226970" remote="130547113800000000" Dst="0" />
+<file name="migration.php" server="192.168.170.16/sumc/development/" local="130473911593070970" remote="130547113800000000" Dst="0" />
+<file name="mimes.php" server="192.168.170.16/sumc/development/" local="130473911592758969" remote="130547113800000000" Dst="0" />
+<file name="profiler.php" server="192.168.170.16/sumc/development/" local="130473911591978968" remote="130547113800000000" Dst="0" />
+<file name="routes.php" server="192.168.170.16/sumc/development/" local="130564613403474473" remote="130564591200000000" Dst="0" />
+<file name="smileys.php" server="192.168.170.16/sumc/development/" local="130473911591822968" remote="130547113800000000" Dst="0" />
+<file name="user_agents.php" server="192.168.170.16/sumc/development/" local="130473911591510967" remote="130547113800000000" Dst="0" />
+<file name="config.php" server="192.168.170.16/hms_old/" local="130547242572812956" remote="130547132400000000" Dst="0" />
+<file name="database.php" server="192.168.170.16/hms_old/" local="130547242042252610" remote="130547131800000000" Dst="0" />
+</dwsync>

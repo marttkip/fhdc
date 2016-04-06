@@ -1,0 +1,1 @@
+E:\instantclient_11_2;E:\app\Kurosaki\product\11.2.0\dbhome_3\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;E:\Program Files\Broadcom\Broadcom 802.11\Driver;E:\Program Files\Common Files\Adobe\AGL;E:\Program Files\GNU\GnuPG\pub
