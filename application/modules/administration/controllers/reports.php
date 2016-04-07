@@ -4,6 +4,9 @@ require_once "./application/modules/auth/controllers/auth.php";
 
 class Reports extends auth
 {	
+
+	
+	
 	function __construct()
 	{
 		parent:: __construct();
@@ -29,6 +32,38 @@ class Reports extends auth
 		$this->session->set_userdata('page_title', 'Cash Report');
 		
 		redirect('administration/reports/all_transactions/'.$module);
+	}
+	
+	public function print_insurance_debtors()
+	{
+		 $insurance_search = $this->session->userdata('insurance_search');
+		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
+		 if(!empty($insurance_search))
+		 {
+		 	$where .= $insurance_search;
+		 }
+		
+		$table = 'visit, patients, insurance_company';
+		$v_data['query'] = $this->reports_model->insurance_debtors_transactions_report($table,$where);
+		
+		echo $this->load->view('administration/reports/insurance_debtors_report', $v_data, true);
+	}
+	public function insurance_debtors_report($module = 'admin')
+	{
+		$_SESSION['all_transactions_search'] = NULL;
+		$_SESSION['all_transactions_tables'] = NULL;
+		
+		$this->session->unset_userdata('search_title');
+		
+		$search = ' AND payments.visit_id = visit.visit_id AND payments.payment_type = 1';
+		$table = ', payments';
+		$_SESSION['all_transactions_search'] = $search;
+		$_SESSION['all_transactions_tables'] = $table;
+		
+		$this->session->set_userdata('debtors', 'false');
+		$this->session->set_userdata('page_title', 'Cash Report');
+		
+		redirect('administration/reports/insurance_debtors_transactions/'.$module);
 	}
 	
 	public function all_reports($module = 'admin')
@@ -132,7 +167,8 @@ class Reports extends auth
 		
 		$page = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
         $v_data["links"] = $this->pagination->create_links();
-		$query = $this->reports_model->get_all_visits($table, $where, $config["per_page"], $page, 'ASC');
+		$query = $this->reports_model->insurance_debtors_transactions();
+		$type=$this->administration_model->search_patient_statement();
 		
 		$v_data['query'] = $query;
 		$v_data['page'] = $page;
@@ -225,6 +261,7 @@ class Reports extends auth
 		$v_data['services_query'] = $this->reports_model->get_all_active_services();
 		$v_data['type'] = $this->reception_model->get_types();
 		$v_data['doctors'] = $this->reception_model->get_doctor();
+		$type=$this->administration_model->search_patient_statement();
 		$v_data['module'] = $module;
 		
 		$data['content'] = $this->load->view('reports/all_transactions', $v_data, true);
@@ -246,6 +283,149 @@ class Reports extends auth
 		$this->load->view('auth/template_sidebar', $data);
 	}
 	
+	public function insurance_debtors_transactions($module = 'admin')
+	{
+	
+		$segment = 5;
+		 $insurance_search = $this->session->userdata('insurance_search');
+		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
+		 if(!empty($insurance_search))
+		 {
+		 	$where .= $insurance_search;
+		 }
+		
+		$table = 'visit, patients, insurance_company';
+		//pagination
+		$this->load->library('pagination');
+		$config['base_url'] = site_url().'/administration/reports/insurance_debtors_transactions/'.$module;
+		$config['total_rows'] = $this->reception_model->count_items($table, $where);
+		$config['uri_segment'] = $segment;
+		$config['per_page'] = 20;
+		$config['num_links'] = 5;
+		
+		
+		$config['full_tag_open'] = '<ul class="pagination pull-right">';
+		$config['full_tag_close'] = '</ul>';
+		
+		$config['first_tag_open'] = '<li>';
+		$config['first_tag_close'] = '</li>';
+		
+		$config['last_tag_open'] = '<li>';
+		$config['last_tag_close'] = '</li>';
+		
+		$config['next_tag_open'] = '<li>';
+		$config['next_link'] = 'Next';
+		$config['next_tag_close'] = '</span>';
+		
+		$config['prev_tag_open'] = '<li>';
+		$config['prev_link'] = 'Prev';
+		$config['prev_tag_close'] = '</li>';
+		
+		$config['cur_tag_open'] = '<li class="active"><a href="#">';
+		$config['cur_tag_close'] = '</a></li>';
+		
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$this->pagination->initialize($config);
+		
+		$page = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
+        $v_data["links"] = $this->pagination->create_links();
+		$query = $this->reports_model->insurance_debtors_transactions($table, $where, $config["per_page"], $page);
+	
+		$data['title'] = 'Patients Statements';
+		$v_data['title'] = ' Patients Statements';
+	
+		
+		$v_data['query'] = $query;
+		$v_data['page'] = $page;
+		$v_data['delete'] = 1;
+		$v_data['module'] = $module;
+		$v_data['insurance_names'] = $this->reports_model->get_insurance_name();
+		$v_data['debtor_period']= $this->reports_model->get_debtor_period();
+		$data['content'] = $this->load->view('reports/insurance_debtors', $v_data, true);
+		if($module == NULL)
+		{
+			$data['sidebar'] = 'admin_sidebar';	
+		}
+		else if($module == 2)
+		{
+			$data['sidebar'] = 'reception_sidebar';
+		}
+		else if($module == 3)
+		{
+			$data['sidebar'] = 'accounts_sidebar';
+		}
+		else
+		{
+			$data['sidebar'] = 'reception_sidebar';
+		}
+		
+		
+		$this->load->view('auth/template_sidebar', $data);
+	}
+	public function insurance_search($module)
+	{
+		
+		$insurance_company_id = $this->input->post('insurance_company_id');
+		$debtors_period_id=$this->input->post('debtors_period_id');
+		
+		if(!empty($insurance_company_id))
+		{
+			$insurance_company_id = ' AND insurance_company.insurance_company_id LIKE \'%'.$insurance_company_id.'%\' ';
+		}
+		else
+		{
+			$insurance_name = '';
+		}
+		
+		if(!empty($debtors_period_id))
+		{
+			$today =date('Y-m-d');
+			
+			if($debtors_period_id == 1)
+			{
+				// thirty day period
+				$end_date = date('Y-m-d',strtotime('-1 month'));
+			}
+			else if($debtors_period_id == 2)
+			{
+				$end_date = date('Y-m-d', strtotime('-2 months'));
+			}
+			else if($debtors_period_id == 3)
+			{
+				$end_date = date('Y-m-d',strtotime('-3 months'));
+			}
+			else
+			{
+				$end_date = date('Y-m-d',strtotime('-3 months'));
+			}
+			
+			if($debtors_period_id == 1 OR $debtors_period_id == 2 OR $debtors_period_id == 3)
+			{
+				$debtors_period_id = ' AND visit.visit_date BETWEEN \''.$end_date.'\' AND \''.$today.'\'';
+			}
+			else
+			{
+				$debtors_period_id = ' AND visit.visit_date > "'.$end_date.'" ';
+			}
+			
+			
+		}
+		else
+		{
+			$debtors_period_id = '';
+		}
+
+		$search = $insurance_company_id.$debtors_period_id;
+		$this->session->set_userdata('insurance_search', $search);
+		
+		$this->insurance_debtors_transactions($module);
+	}
+	public function close_insurance_debtors_search()
+	{
+		$this->session->unset_userdata('insurance_search');
+		redirect('administration/reports/insurance_debtors_transactions/admin');
+	}
 	public function debtors_report_data($insurance_company_id, $order = 'debtor_invoice_created', $order_method = 'DESC')
 	{
 		//get bill to but from insurance company
@@ -361,6 +541,7 @@ class Reports extends auth
 			$v_data['page'] = $page;
 			$v_data['search'] = $visit_search;
 			$v_data['total_patients'] = $this->reports_model->get_total_visits($where, $table);
+			
 			$v_data['total_services_revenue'] = $this->reports_model->get_total_services_revenue($where, $table);
 			$v_data['total_payments'] = $this->reports_model->get_total_cash_collection($where, $table);
 			
@@ -451,6 +632,7 @@ class Reports extends auth
 			//$v_data['module'] = $module;
 			
 			$data['content'] = $this->load->view('reports/debtors_report', $v_data, true);
+			$type=$this->administration_model->search_patient_statement();
 		}
 		
 		else
@@ -467,7 +649,7 @@ class Reports extends auth
 		
 		$this->load->view('auth/template_sidebar', $data);
 	}
-	
+
 	public function select_debtor()
 	{
 		$insurance_company_id = $this->input->post('insurance_company_id');
@@ -560,6 +742,12 @@ class Reports extends auth
 	{
 		$this->reports_model->export_transactions();
 	}
+	
+	public function export_insurance_debtors()
+	{
+		$this->reports_model->export_insurance_debtors();
+	}
+	
 	public function export_time_report()
 	{
 		$this->reports_model->export_time_report();

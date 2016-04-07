@@ -15,7 +15,7 @@
 |
 */
 //$config['base_url']	= 'http://sagana/hms/sumc/';
-$config['base_url']	= 'http://localhost/hms/';
+$config['base_url']	= 'http://localhost/fhdc/';
 // $config['base_url']	= 'http://192.168.1.59/hms/';
 /*
 |--------------------------------------------------------------------------

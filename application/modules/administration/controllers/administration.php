@@ -906,6 +906,11 @@ class Administration extends auth
 		
 		$this->expenses($module);
 	}
+	
+	//debtors(insurance) seearch
+	
+	
+	
 	public function delete_expense($expense_id)
 	{
 		if($this->administration_model->delete_expense($expense_id))
@@ -1014,6 +1019,75 @@ class Administration extends auth
 	// expenses end
 
 	// suppliers start
+	public function insurance($module = NULL)
+	{
+				$where = 'insurance_company_id > 0 AND insurance_company_status = 0';
+		$insurance_search = $this->session->userdata('insurance_search');
+		
+		if(!empty($insurance_search))
+		{
+			$where .= $insurance_search;
+		}
+		
+		if($module == NULL)
+		{
+			$segment = 3;
+		}
+		
+		else
+		{
+			$segment = 4;
+		}
+		$table = 'insurance_company';
+		//pagination
+		$this->load->library('pagination');
+		$config['base_url'] = site_url().'/administration/insurance_search/'.$module;
+		$config['total_rows'] = $this->reception_model->count_items($table, $where);
+		$config['uri_segment'] = $segment;
+		$config['per_page'] = 20;
+		$config['num_links'] = 5;
+		
+		$config['full_tag_open'] = '<ul class="pagination pull-right">';
+		$config['full_tag_close'] = '</ul>';
+		
+		$config['first_tag_open'] = '<li>';
+		$config['first_tag_close'] = '</li>';
+		
+		$config['last_tag_open'] = '<li>';
+		$config['last_tag_close'] = '</li>';
+		
+		$config['next_tag_open'] = '<li>';
+		$config['next_link'] = 'Next';
+		$config['next_tag_close'] = '</span>';
+		
+		$config['prev_tag_open'] = '<li>';
+		$config['prev_link'] = 'Prev';
+		$config['prev_tag_close'] = '</li>';
+		
+		$config['cur_tag_open'] = '<li class="active"><a href="#">';
+		$config['cur_tag_close'] = '</a></li>';
+		
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$this->pagination->initialize($config);
+		
+		$page = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
+        $v_data["links"] = $this->pagination->create_links();
+		$query = $this->administration_model->get_all_insurance_debtors();
+		
+
+		$v_data['query'] = $query;
+		$v_data['page'] = $page;
+		
+		$data['title'] = 'Clinic Expenses';
+		$v_data['title'] = 'Clinic Expenses';
+		$v_data['module'] = 0;
+		
+		$total_amount = $this->administration_model->get_expense_total_amount($where);
+		$v_data['total_expense'] = $total_amount;
+		$v_data['module'] = $module;
+		$data['content'] = $this->load->view('reports/insurance_debtors', $v_data, true);
+	}
 
 	public function new_supplier($module = NULL)
 	{

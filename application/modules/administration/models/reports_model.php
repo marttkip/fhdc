@@ -723,6 +723,128 @@ class Reports_model extends CI_Model
 		$this->excel->generateXML ($title);
 	}
 	
+	function export_insurance_debtors()
+	{
+		$this->load->library('excel');
+		$report = array();
+		
+		 $insurance_search = $this->session->userdata('insurance_search');
+		// $where = '(visit_type_id <> 2 OR visit_type_id <> 1) AND patient_delete = '.$delete;
+		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
+		 if(!empty($insurance_search))
+		 {
+		 	$where .= $insurance_search;
+		 }
+		
+		$table = 'visit, patients, insurance_company';
+		
+		$this->db->where($where);
+		$this->db->order_by('visit_date', 'ASC');
+		$this->db->select('*');
+		$this->db->group_by('visit_id');
+		$visits_query = $this->db->get($table);
+		
+		$title = 'Insuance Debtors Reports '.date('jS M Y H:i a');;
+		
+		if($visits_query->num_rows() > 0)
+		{
+			$count = 0;
+			/*
+				-----------------------------------------------------------------------------------------
+				Document Header
+				-----------------------------------------------------------------------------------------
+			*/
+			$row_count = 0;
+			$report[$row_count][0] = '#';
+			$report[$row_count][1] = 'Visit Date';
+			$report[$row_count][2] = 'Patient Number';
+			$report[$row_count][3] = 'Patient Name';
+			$report[$row_count][4] = 'Insurance Company';
+			$report[$row_count][5] = 'Patient Insurance Number';
+			$report[$row_count][6] = 'Procedures';
+			$report[$row_count][7] = 'Amount';
+			$report[$row_count][8] = 'Paid';
+			$report[$row_count][9] = 'Balance';
+			$current_column = 10 ;
+			
+			$current_column++;
+
+			
+			foreach($visits_query->result() as $row)
+			{
+				
+				$total_invoiced = 0;
+				$amount_paid= 0;
+				$insurance_company_name=$row->insurance_company_name;
+				$patient_id = $row->patient_id;
+				$insurance_number=$row->patient_insurance_number;
+				$visit_date=$row->visit_date;
+				$visit_id = $row->visit_id;
+				$patient_id = $row->patient_id;
+				$patient_othernames = $row->patient_othernames;
+				$patient_surname = $row->patient_surname;
+				$patient_number=$row->patient_number;
+				
+				if($insurance_number > 0)
+				{
+					echo $insurance_number;
+				}
+				else
+				{	$insurance_number =' - ';
+					}
+				
+				$total_invoice = $this->accounts_model->total_invoice($visit_id);
+				$total_payments = $this->accounts_model->total_payments($visit_id);
+				$balance= $total_invoice - $total_payments;
+				if($balance > 0)
+				{
+					$item_invoiced_rs = $this->accounts_model->get_patient_visit_charge_items($visit_id);
+					$procedures = '';
+					 if(count($item_invoiced_rs) > 0)
+					 {
+							$s=0;
+							foreach ($item_invoiced_rs as $key_items):
+							
+							  $s++;
+							  
+							  $service_charge_name = $key_items->service_charge_name;
+							  $visit_charge_amount = $key_items->visit_charge_amount;
+							  $service_name = $key_items->service_name;
+							  $units = $key_items->visit_charge_units;
+							   if(count($item_invoiced_rs) == $s)
+							   {
+								   $bound = '';
+							   }
+							   else{
+								   $bound = ',';
+							   }
+							   $procedures .= $service_charge_name.''.$bound;
+							   
+							endforeach;
+					 }
+				}
+			$row_count++;
+			$report[$row_count][0] = $count;
+			$report[$row_count][1] = $visit_date;
+			$report[$row_count][2] = $patient_number;
+			$report[$row_count][3] = $patient_surname.$patient_othernames;
+			$report[$row_count][4] = $insurance_company_name;
+			$report[$row_count][5] = $insurance_number;
+			$report[$row_count][6] = $procedures;
+			$report[$row_count][7] = $total_invoice;
+			$report[$row_count][8] = $total_payments;
+			$report[$row_count][9] = $balance;
+			$current_column = 10 ;
+
+				}
+			
+		}
+		//create the excel document
+		$this->excel->addArray ( $report );
+		$this->excel->generateXML ($title);
+	}
+	
+	
 	/*
 	*	Export Time report
 	*
@@ -1006,7 +1128,51 @@ class Reports_model extends CI_Model
 		
 		return $query;
 	}
-
+	
+	public function get_insurance_name()
+	{
+		$table = "insurance_company";
+		$where = "insurance_company_id > 0";
+		$items = "insurance_company_id, insurance_company_name";
+		$order = "insurance_company_name";
+		
+		$result = $this->database->select_entries_where($table, $where, $items, $order);
+		
+		return $result;
+	}
+		public function get_debtor_period()
+	{
+		$table = "debtors_period";
+		$where = "debtors_period_id > 0";
+		$items = "debtors_period_id, debtors_period_duration";
+		$order = "debtors_period_duration";
+		
+		$result = $this->database->select_entries_where($table, $where, $items, $order);
+		
+		return $result;
+	}
+	public function insurance_debtors_transactions($table, $where, $per_page, $page)
+	{
+		//retrieve all users
+		$this->db->from($table);
+		$this->db->select('*');
+		$this->db->where($where);
+		$this->db->order_by('visit.visit_date' ,'desc');
+		$query = $this->db->get('', $per_page, $page);
+		
+		return $query;
+	}
+	public function insurance_debtors_transactions_report($table,$where)
+	{
+		$this->db->from($table);
+		$this->db->select('*');
+		$this->db->where($where);
+		
+		$query=$this->db->get();
+		return $query;
+	}
+	
+	
 	public function get_total_collected($doctor_id, $date_from = NULL, $date_to = NULL)
 	{
 		$table = 'visit_charge, visit';

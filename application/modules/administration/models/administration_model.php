@@ -224,6 +224,15 @@ class Administration_model extends CI_Model
 		
 		return $query;
 	}
+	
+	public function get_all_insurance_debtors()
+	{
+		$this->db->from('insurance_company');
+		$this->db->select('*');
+		$this->db->where('insurance_company_id > 0 AND insurance_company_status = 0');
+		$query = $this->db->get('');	
+		return $query;
+	}
 	public function get_expense_total_amount($where)
 	{
 		$this->db->from('expenses');

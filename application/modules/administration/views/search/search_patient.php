@@ -19,8 +19,7 @@
 			
 			
 			echo form_open("administration/search_patient_statement", array("class" => "form-horizontal"));
-			
-            
+		
             ?>
             <div class="row">
                 <div class="col-md-6">
