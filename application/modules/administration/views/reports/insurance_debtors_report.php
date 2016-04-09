@@ -86,7 +86,7 @@
 				$count = 0;
 				foreach ($query->result() as $row)
 				{
-				$count++;
+				//$count++;
 				$total_invoiced = 0;
 				$amount_paid= 0;
 				$insurance_company_name=$row->insurance_company_name;
@@ -98,7 +98,9 @@
 				$patient_othernames = $row->patient_othernames;
 				$patient_surname = $row->patient_surname;
 				$patient_number=$row->patient_number;
+				$served_by= $this->session->userdata('personnel_surname');
 				
+				$today =date('Y-m-d');
 				
 				if($insurance_number > 0)
 				{
@@ -113,6 +115,7 @@
 				$total_payments = $this->accounts_model->total_payments($visit_id);
 				$balance= $total_invoice - $total_payments;
 				if($balance > 0){
+					$count++;
 					$item_invoiced_rs = $this->accounts_model->get_patient_visit_charge_items($visit_id);
 					$procedures = '';
 					 if(count($item_invoiced_rs) > 0){

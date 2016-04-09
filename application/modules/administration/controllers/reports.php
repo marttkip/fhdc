@@ -36,11 +36,11 @@ class Reports extends auth
 	
 	public function print_insurance_debtors()
 	{
-		 $insurance_search = $this->session->userdata('insurance_search');
+		 $search_insurance = $this->session->userdata('search_insurance');
 		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
-		 if(!empty($insurance_search))
+		 if(!empty($search_insurance))
 		 {
-		 	$where .= $insurance_search;
+		 	$where .= $search_insurance;
 		 }
 		
 		$table = 'visit, patients, insurance_company';
@@ -287,11 +287,11 @@ class Reports extends auth
 	{
 	
 		$segment = 5;
-		 $insurance_search = $this->session->userdata('insurance_search');
+		 $search_insurance = $this->session->userdata('search_insurance');
 		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
-		 if(!empty($insurance_search))
+		 if(!empty($search_insurance))
 		 {
-		 	$where .= $insurance_search;
+		 	$where .= $search_insurance;
 		 }
 		
 		$table = 'visit, patients, insurance_company';
@@ -342,6 +342,7 @@ class Reports extends auth
 		$v_data['module'] = $module;
 		$v_data['insurance_names'] = $this->reports_model->get_insurance_name();
 		$v_data['debtor_period']= $this->reports_model->get_debtor_period();
+		 
 		$data['content'] = $this->load->view('reports/insurance_debtors', $v_data, true);
 		if($module == NULL)
 		{
@@ -363,7 +364,7 @@ class Reports extends auth
 		
 		$this->load->view('auth/template_sidebar', $data);
 	}
-	public function insurance_search($module)
+	public function search_insurance($module)
 	{
 		
 		$insurance_company_id = $this->input->post('insurance_company_id');
@@ -371,7 +372,7 @@ class Reports extends auth
 		
 		if(!empty($insurance_company_id))
 		{
-			$insurance_company_id = ' AND insurance_company.insurance_company_id LIKE \'%'.$insurance_company_id.'%\' ';
+			$insurance_company_id = ' AND insurance_company.insurance_company_id ='.$insurance_company_id;
 		}
 		else
 		{
@@ -417,13 +418,14 @@ class Reports extends auth
 		}
 
 		$search = $insurance_company_id.$debtors_period_id;
-		$this->session->set_userdata('insurance_search', $search);
+		$this->session->set_userdata('search_insurance', $search);
 		
-		$this->insurance_debtors_transactions($module);
+		//$this->insurance_debtors_transactions($module);
+		redirect('administration/reports/insurance_debtors_transactions/'.$module);
 	}
 	public function close_insurance_debtors_search()
 	{
-		$this->session->unset_userdata('insurance_search');
+		$this->session->unset_userdata('search_insurance');
 		redirect('administration/reports/insurance_debtors_transactions/admin');
 	}
 	public function debtors_report_data($insurance_company_id, $order = 'debtor_invoice_created', $order_method = 'DESC')

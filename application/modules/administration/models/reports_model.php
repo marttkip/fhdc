@@ -728,12 +728,12 @@ class Reports_model extends CI_Model
 		$this->load->library('excel');
 		$report = array();
 		
-		 $insurance_search = $this->session->userdata('insurance_search');
+		 $search_insurance = $this->session->userdata('search_insurance');
 		// $where = '(visit_type_id <> 2 OR visit_type_id <> 1) AND patient_delete = '.$delete;
 		$where = 'visit.patient_id = patients.patient_id AND patients.insurance_company_id = insurance_company.insurance_company_id';
-		 if(!empty($insurance_search))
+		 if(!empty($search_insurance))
 		 {
-		 	$where .= $insurance_search;
+		 	$where .= $search_insurance;
 		 }
 		
 		$table = 'visit, patients, insurance_company';
@@ -798,6 +798,7 @@ class Reports_model extends CI_Model
 				$balance= $total_invoice - $total_payments;
 				if($balance > 0)
 				{
+					$count++;
 					$item_invoiced_rs = $this->accounts_model->get_patient_visit_charge_items($visit_id);
 					$procedures = '';
 					 if(count($item_invoiced_rs) > 0)
@@ -822,7 +823,7 @@ class Reports_model extends CI_Model
 							   
 							endforeach;
 					 }
-				}
+				
 			$row_count++;
 			$report[$row_count][0] = $count;
 			$report[$row_count][1] = $visit_date;
@@ -837,7 +838,7 @@ class Reports_model extends CI_Model
 			$current_column = 10 ;
 
 				}
-			
+			}
 		}
 		//create the excel document
 		$this->excel->addArray ( $report );
